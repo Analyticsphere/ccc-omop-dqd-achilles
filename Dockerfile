@@ -24,6 +24,9 @@ WORKDIR /app
 # Copy application code into the container
 COPY . /app
 
+# Make output directories
+RUN mkdir /Achilles/output && mkdir /DQD/output
+
 # Expose the desired port (optional but recommended)
 EXPOSE 8080
 
