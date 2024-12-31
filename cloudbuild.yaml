@@ -1,0 +1,26 @@
+steps:
+
+ # Build the container image
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['build','-t', 'gcr.io/nih-nci-dceg-connect-dev/ccc-omop-dqd-achilles', '.']
+   timeout: 1200s
+   
+ # Push the container image to Container Registry
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['push', 'gcr.io/nih-nci-dceg-connect-dev/ccc-omop-dqd-achilles']
+   
+ # Deploy container image to Cloud Run
+ - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+   entrypoint: gcloud
+   args: ['run','deploy','ccc-omop-dqd-achilles', 
+   '--image=gcr.io/nih-nci-dceg-connect-dev/ccc-omop-dqd-achilles', 
+   '--region=us-central1', 
+   '--service-account=qa-qc-dev@nih-nci-dceg-connect-dev.iam.gserviceaccount.com', # Directly use the substitution variable
+   '--set-env-vars=PROJECT_ID=nih-nci-dceg-connect-dev', # Set runtime env var for use in R
+  ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  
+images:
+ - 'gcr.io/nih-nci-dceg-connect-dev/ccc-omop-dqd-achilles'

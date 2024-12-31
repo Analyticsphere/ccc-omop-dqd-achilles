@@ -1,0 +1,249 @@
+============================================================================== 
+Magnitude Simba Google BigQuery JDBC Data Connector Release Notes 
+============================================================================== 
+
+The release notes provide details of enhancements, features, known issues, and 
+workflow changes in Simba Google BigQuery JDBC Connector 1.3.2, as well as 
+the version history. 
+
+
+1.3.2 ========================================================================
+
+Released 2023-02-20
+
+Enhancements & New Features
+
+ * [GBQJ-587] Updated User Account authentication workflow 
+ 
+   When authenticating with User Account authentication (OAuthType=1), the
+   connector now opens a browser to the Google sign-in page, and in the 
+   background triggers a listener that waits for 60 seconds. 
+   - If the sign-in in the browser is successful, the connector gets the 
+   refresh token and stores it. 
+   - If the sign-in in the browser fails, a connection error appears, or the
+   operation takes more than 60 seconds to complete and the listener closes 
+   with an error. The connection fails and you have to reconnect.
+
+ * [GBQJ-585] Unicode column name support
+
+   The connector now supports Unicode characters for table column names. This
+   feature is currently in private preview.
+
+ * [GBQJ-541] Column default value support
+
+   getColumns now returns the default value for a column in COLUMN_DEF column.
+   For more information, see: https://cloud.google.com/bigquery/docs/default-values.
+
+ * [GBQJ-603] New BYOID connection properties
+
+   For workload and workforce identity federation external accounts, the 
+   connector now supports the following BYOID properties:
+   - BYOID_AudienceUri   
+   - BYOID_CredentialSource
+   - BYOID_PoolUserProject
+   - BYOID_SA_Impersonation_Uri
+   - BYOID_SubjectTokenType 
+   - BYOID_TokenUri   
+   
+   For more information, see the Installation and Configuration Guide.
+
+ * [GBQJ-599] Updated Private Service Connect support
+
+   The connector now validates the URLs provided for Private Service Connect
+   features. 
+
+ * [GBQJ-593] Updated query time out behavior
+
+   When a query request times out on the socket, the connector now throws the
+   read timeout error and does not retry the request. 
+
+ * [GBQJ-609] Increased read timeout
+
+   For requests, the connector now uses an increased timeout for read timeout 
+   and connect timeout to prevent receiving read or socket timeouts. 
+
+ * [GBQJ-613] Updated table support
+
+   The connector now supports the SNAPSHOT table type.
+
+
+Resolved Issues
+The following issues have been resolved in Simba Google BigQuery JDBC 
+Connector 1.3.2.
+
+ * [GBQJ-590] The following security vulnerability has been resolved: 
+   CVE-2022-3171: google-cloud-bigquerystorage:jar:2.26.0. Previously, it was
+   1.19.0. 
+
+ * [GBQJ-586] When fetching with High-Throughput API and the service account 
+   does not have all required roles, the connector hangs.
+
+
+Known Issues
+The following are known issues that you may encounter due to limitations in
+the data source, the connector, or an application.
+
+ * [GBQJ-594] The connector does not support executable-sourced credentials 
+   for workforce and workload Identity Federation (External Account 
+   Authentication).
+
+ * The connector does not support parameterized types for Resultset and 
+   Parameter metadata. 
+
+   This is a limitation of the Google BigQuery server. 
+
+ * Connector terminates when multiple connections are set to LogLevel=6.
+  
+   When multiple connections with the same LogPath directory are running with
+   LogLevel set to 6, a collision might happen. This results in one of the 
+   connections terminating unexpectedly. 
+
+ * The connector no longer supports parameters in the exception block.
+   
+   This is a limitation of the Google BigQuery server discovered on Mar 2021.
+
+ * TRACE level logs incorrectly contain stack trace for function entrances.
+
+   When logging at the TRACE level (LogLevel=6), function entrance logs are 
+   generated for each function that is called. These logs incorrectly 
+   include a stack trace.
+
+ * Query prefixes are not supported.
+
+   The driver does not support query prefixes. To specify whether your query
+   statements are to be processed using standard SQL or legacy BigQuery SQL, 
+   configure the QueryDialect connection property. 
+
+   By default, QueryDialect is set to "SQL" so that the driver uses standard
+   SQL syntax. To use BigQuery SQL instead, set the property to "BIG_QUERY".
+
+ * Support for ODBC Escape Sequences is limited.
+
+   The only supported ODBC Escape Sequences are Scalar Functions of the form 
+   {fn func(args)} if func is supported by the Google BigQuery data source 
+   engine. 
+
+ * When casting data, you must specify the data type according to Google 
+   BigQuery standards.
+
+   When casting data to a specific data type, you must use the corresponding 
+   data type name shown in the "Casting" section of the Query Reference:
+   https://cloud.google.com/bigquery/sql-reference/functions-and-operators#casting. 
+
+   For example, to cast the "salary" column to the INTEGER type, you must 
+   specify INT64 instead of INTEGER: 
+
+      SELECT position, CAST(salary AS INT64) from Employee
+
+
+Workflow Changes =============================================================
+
+The following changes may disrupt established workflows for the connector.
+
+
+1.3.2 ------------------------------------------------------------------------
+
+ * [GBQJ-597] Updated Timeout property 
+
+   The default value of the Timeout property is now 300. Previously, it was 
+   10. For more information, see the Installation and Configuration Guide.
+
+
+1.2.20 -----------------------------------------------------------------------
+
+ * [GBQJ-439] Updated Timeout property 
+
+   The description of the Timeout property has been updated. For more 
+   information, see the Installation and Configuration Guide.
+
+
+1.2.14 -----------------------------------------------------------------------
+
+ * [GBQJ-435] MaxResults default value
+
+   Beginning with this release, MaxResults now defaults to 10,000. The 
+   previous default (0) of unlimited rows would cause an increase in query
+   execution time in many scenarios. For more information, see the 
+   Installation and Configuration Guide.
+
+
+1.2.2 ------------------------------------------------------------------------
+
+ * Removed support for JDBC 4.1 (Java 7)
+
+   Beginning with this release, the driver no longer supports JDBC 4.1 (Java 
+   7). For a list of supported JDBC versions, see the Installation and 
+   Configuration Guide.
+
+
+Version History ==============================================================
+
+1.3.0 ------------------------------------------------------------------------
+
+Released 2022-08-30
+
+Enhancements & New Features
+
+ * [GBQJ-551] External account authentication support
+
+   You can now configure the connector to authenticate the connection using 
+   an external account (workforce or workload identity federation). To do 
+   this, set the OAuthType property to 4, the ProjectID property to the 
+   desired project, and then set the workforce or workload configuration file 
+   to one of the following properties:
+   - OAuthPvtKey
+   - OAuthPvtKeyPath
+   
+   For more information, see the Installation and Configuration Guide. 
+   
+ * [GBQJ-543] Private Service Connect support
+
+   You can now configure the connector to use Private Service Connect URLs. To
+   do this, set the PrivateServiceConnectUris property to the desired URI. For
+   more information, see the Installation and Configuration Guide.   
+
+ * [GBQJ-566] Transaction API support
+
+   The connector now supports JDBC transaction APIs. BigQuery supports 
+   multi-statement transactions inside a single query, or across multiple 
+   queries, when using sessions. For more information about transactions, see:
+   https://cloud.google.com/bigquery/docs/reference/standard-sql/transactions.
+   
+   To use transaction APIs, and work with transactions across multiple 
+   queries, set the EnableSession property to 1. For more information about
+   sessions, see:
+   https://cloud.google.com/bigquery/docs/sessions-intro    
+   
+ * [GBQJ-542] Default project for dataset support
+
+   The connector is now verified to use a default project for datasets. To do 
+   this, set the dataset_project_id property in QueryProperties of the 
+   connection string to the desired project. For more information, see the 
+   Installation and Configuration Guide and the Google BigQuery documentation:
+   https://cloud.google.com/bigquery/docs/reference/rest/v2/ConnectionProperty 
+   
+ * [GBQJ-558] MATERIALIZED_VIEW table support 
+   
+   MATERIALIZED_VIEW has been added to the list of table types. To retrieve 
+   the list of table types, use the getTableTypes function.
+   
+ * [GBQJ-562] JSON data type support 
+
+   The connector now supports the JSON data type. For more information, see
+   the Installation and Configuration Guide and the Google BigQuery 
+   documentation:
+   https://cloud.google.com/bigquery/docs/reference/standard-sql/json-data
+
+ * [GBQJ-581] Improvements to projects.list API
+
+   The MaxResults connection property is now applied to the projects.list 
+   call. This API is used when the connector requests the list of projects.      
+   
+ * [GBQJ-548][GBQJ-571] Third-party library updates
+
+   The connector has been updated with the following third-party libraries:
+   - google-oauth-client 1.34.1 (previously 1.33.1)
+   - avro 1.11.1 (previously 1.11.0)
+
+
+============================================================================== 
